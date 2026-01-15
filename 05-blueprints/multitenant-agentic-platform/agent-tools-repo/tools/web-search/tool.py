@@ -94,7 +94,7 @@ def web_search(query: str, max_results: int = 5) -> str:
                         'snippet': snippet,
                         'url': link
                     })
-            except Exception as e:
+            except Exception:
                 # Skip this result if there's an error parsing it
                 continue
         

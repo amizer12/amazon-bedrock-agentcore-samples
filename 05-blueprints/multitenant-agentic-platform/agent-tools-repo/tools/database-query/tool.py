@@ -1,6 +1,5 @@
 from strands import tool
 import boto3
-import json
 
 @tool
 def database_query(sql: str, database: str = "default") -> str:

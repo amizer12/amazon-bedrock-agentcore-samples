@@ -40,7 +40,7 @@ def get_datetime(timezone: str = "UTC") -> str:
         # Format the response
         result = []
         result.append(f"**Current Date & Time Information**{timezone_note}")
-        result.append(f"")
+        result.append("")
         result.append(f"📅 **Date**: {now.strftime('%A, %B %d, %Y')}")
         result.append(f"🕐 **Time**: {now.strftime('%I:%M:%S %p')}")
         result.append(f"⏰ **24-Hour Time**: {now.strftime('%H:%M:%S')}")

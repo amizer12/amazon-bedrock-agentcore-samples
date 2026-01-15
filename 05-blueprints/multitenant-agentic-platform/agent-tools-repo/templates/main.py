@@ -38,7 +38,7 @@ def send_usage_to_sqs(input_tokens, output_tokens, total_tokens, user_message, r
             'response_message': response_message
         }
         
-        response = sqs.send_message(
+        sqs.send_message(
             QueueUrl=QUEUE_URL,
             MessageBody=json.dumps(message_body)
         )
