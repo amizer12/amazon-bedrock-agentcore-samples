@@ -1,5 +1,6 @@
 from strands import tool
 import boto3
+import os
 import re
 
 @tool
@@ -47,8 +48,9 @@ def send_email(to: str, subject: str, body: str, from_email: str = "noreply@exam
         if not body or not body.strip():
             return "Error: Email body cannot be empty"
         
-        # Initialize SES client
-        ses_client = boto3.client('ses', region_name='us-west-2')
+        # Initialize SES client with region from environment
+        region = os.environ.get('AWS_REGION', 'us-west-2')
+        ses_client = boto3.client('ses', region_name=region)
         
         # Send email
         response = ses_client.send_email(

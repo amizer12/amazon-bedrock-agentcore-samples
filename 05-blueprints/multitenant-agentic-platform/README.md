@@ -256,7 +256,7 @@ AWS_DEFAULT_REGION=eu-central-1 cdk destroy --app "python3 src/cdk_app.py"
 - DynamoDB tables are deleted with their data
 - No manual cleanup required
 
-## Adding your cusotm tool into deployment (Optional)
+## Adding your custom tool into deployment (Optional)
 
 To deploy agents with your own custom tools, create a custom tool repository based on the included `agent-tools-repo` template. During agent deployment, provide the URL to your repository, load your tool definitions, select the applicable tools, and deploy the agent with them.
 

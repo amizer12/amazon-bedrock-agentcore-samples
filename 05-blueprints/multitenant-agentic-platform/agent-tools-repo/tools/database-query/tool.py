@@ -1,5 +1,6 @@
 from strands import tool
 import boto3
+import os
 
 @tool
 def database_query(sql: str, database: str = "default") -> str:
@@ -21,18 +22,28 @@ def database_query(sql: str, database: str = "default") -> str:
         result = database_query("SELECT COUNT(*) FROM orders", database="analytics")
     
     Note:
-        Requires AWS RDS Data API to be configured with appropriate
-        resource ARN and secret ARN. Update the ARNs in the code
-        before using this tool.
+        Requires AWS RDS Data API to be configured. Set these environment variables:
+        - RDS_RESOURCE_ARN: ARN of your RDS cluster
+        - RDS_SECRET_ARN: ARN of your Secrets Manager secret  
+        - AWS_REGION: AWS region (optional, defaults to us-west-2)
     """
     try:
-        # Initialize RDS Data API client
-        rds_client = boto3.client('rds-data', region_name='us-west-2')
+        # Get configuration from environment variables
+        resource_arn = os.environ.get('RDS_RESOURCE_ARN')
+        secret_arn = os.environ.get('RDS_SECRET_ARN')
+        region = os.environ.get('AWS_REGION', 'us-west-2')
         
-        # TODO: Replace these with your actual ARNs
-        # You can also pass these as environment variables or configuration
-        resource_arn = 'arn:aws:rds:us-west-2:123456789012:cluster:your-db-cluster'
-        secret_arn = 'arn:aws:secretsmanager:us-west-2:123456789012:secret:your-db-secret'
+        # Validate configuration
+        if not resource_arn or not secret_arn:
+            return (
+                "Error: Database not configured. Please set the following environment variables:\n"
+                "- RDS_RESOURCE_ARN: ARN of your RDS cluster (e.g., arn:aws:rds:region:account:cluster:name)\n"
+                "- RDS_SECRET_ARN: ARN of your Secrets Manager secret (e.g., arn:aws:secretsmanager:region:account:secret:name)\n"
+                "- AWS_REGION: AWS region (optional, defaults to us-west-2)"
+            )
+        
+        # Initialize RDS Data API client
+        rds_client = boto3.client('rds-data', region_name=region)
         
         # Execute SQL statement
         response = rds_client.execute_statement(
@@ -93,4 +104,4 @@ def database_query(sql: str, database: str = "default") -> str:
     except rds_client.exceptions.StatementTimeoutException:
         return "Query timed out. Try simplifying your query or adding appropriate indexes."
     except Exception as e:
-        return f"Error executing database query: {str(e)}\n\nNote: Ensure RDS Data API is configured with correct resource and secret ARNs."
+        return f"Error executing database query: {str(e)}"

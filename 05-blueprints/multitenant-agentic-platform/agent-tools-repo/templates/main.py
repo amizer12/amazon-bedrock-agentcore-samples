@@ -1,6 +1,7 @@
 from bedrock_agentcore import BedrockAgentCoreApp
 from strands import Agent
 import boto3
+import os
 from datetime import datetime
 import uuid
 import json
@@ -15,8 +16,9 @@ MODEL_ID = 'MODEL_ID_VALUE'
 SYSTEM_PROMPT = '''SYSTEM_PROMPT_VALUE'''
 
 # Initialize AWS clients
-sqs = boto3.client('sqs', region_name='us-west-2')
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')
+region = os.environ.get('AWS_REGION', 'us-west-2')
+sqs = boto3.client('sqs', region_name=region)
+dynamodb = boto3.resource('dynamodb', region_name=region)
 config_table = dynamodb.Table('agent-configurations')
 
 # Tools will be injected here by the build system
