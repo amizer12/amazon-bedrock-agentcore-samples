@@ -55,13 +55,6 @@ def lambda_handler(event, context):
                 "body": json.dumps({"error": "Agent not found"}),
             }
 
-        if not agent_runtime_id:
-            return {
-                "statusCode": 400,
-                "headers": CORS_HEADERS,
-                "body": json.dumps({"error": "Agent runtime ID not found in details"}),
-            }
-
         # Step 1: Delete the agent runtime from Bedrock first
         print(f"Step 1: Deleting agent runtime from Bedrock: {agent_runtime_id}")
         try:
