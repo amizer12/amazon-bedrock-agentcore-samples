@@ -100,9 +100,11 @@ This script will:
 1. Install frontend dependencies
 2. Build the React application
 3. Deploy the entire CDK stack (infrastructure + frontend)
-4. **Automatically generate config.js** with API endpoint and key
+4. **Automatically generate config.js** with API endpoint and key (⚠️ See Security Considerations below)
 5. Deploy frontend to S3 and CloudFront
 6. Invalidate CloudFront cache
+
+> **⚠️ Security Note**: The deployment process embeds the API Gateway key in a publicly accessible `config.js` file. This is suitable for demos and development only. See the [Security Considerations](#security-considerations) section for production recommendations.
 
 ### Deploy to a Specific Region
 
@@ -175,23 +177,41 @@ After deployment, you'll see outputs including:
 
 ## Usage
 
+### Security Considerations
+
+**⚠️ IMPORTANT: This blueprint is designed for demonstration and development purposes.**
+
+The current implementation has the following security limitations:
+
+1. **API Key Exposure**: The API Gateway API key is embedded in client-side JavaScript (`config.js`), making it publicly accessible to anyone who views the page source or network traffic. This means:
+   - Anyone with access to the dashboard URL can extract the API key
+   - The API key can be used to make unlimited API calls
+   - This defeats the purpose of API key authentication
+
+2. **Suitable Use Cases**:
+   - Internal demos where the dashboard URL is not publicly accessible
+   - Development and testing environments
+   - Proof-of-concept deployments within a trusted network
+
+3. **Production Recommendations**:
+   
+   For production deployments, implement one of these authentication mechanisms:
+   
+   - **Amazon Cognito**: Use Cognito User Pools for user authentication with JWT tokens
+   - **IAM Authentication**: Use AWS Signature Version 4 for API requests
+   - **Backend-for-Frontend (BFF)**: Implement a server-side proxy that handles API authentication
+   - **Remove API Keys**: Use VPC endpoints, IP allowlisting, or other network-level controls instead
+
+   See `src/lambda_functions/config_injector/handler.py` for detailed implementation notes.
+
+### Getting Started
+
 1. Visit the CloudFront URL from the stack outputs
 2. Enter a tenant ID
 3. Configure your agent (model, system prompt, tools)
 4. Click "Deploy Agent"
 5. Once deployed, invoke the agent from the dashboard
 6. Monitor token usage and costs in real-time
-
-## API Endpoints
-
-- `POST /deploy` - Deploy new agent (requires API key)
-- `POST /invoke` - Invoke deployed agent
-- `GET /agents` - List all agents
-- `GET /agent` - Get agent details
-- `DELETE /agent` - Delete agent
-- `GET /usage` - Get token usage statistics
-- `GET /infrastructure-costs` - Get infrastructure costs per tenant
-- `PUT/GET /config` - Update/get agent configuration
 
 ## Development
 
@@ -212,6 +232,8 @@ The frontend will run on `http://localhost:3000` and use the deployed API.
 ```
 
 The config.js will be automatically regenerated with the latest API credentials.
+
+> **⚠️ Security Reminder**: The API key is embedded in the frontend config.js file. This architecture is suitable for demos and internal tools only. For production deployments, implement proper authentication (see [Security Considerations](#security-considerations)).
 
 ## Cost Tracking
 

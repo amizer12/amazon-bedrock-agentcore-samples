@@ -92,7 +92,7 @@ class ApiConstruct(Construct):
         resource.add_method(
             "GET",
             apigateway.LambdaIntegration(lambda_fn, proxy=True),
-            api_key_required=False,
+            api_key_required=True,
         )
         add_cors_options(resource, ["GET", "OPTIONS"])
 
@@ -102,7 +102,7 @@ class ApiConstruct(Construct):
         resource.add_method(
             "POST",
             apigateway.LambdaIntegration(lambda_fn, proxy=True),
-            api_key_required=False,
+            api_key_required=True,
         )
         add_cors_options(resource, ["POST", "OPTIONS"])
 
@@ -114,12 +114,12 @@ class ApiConstruct(Construct):
         resource.add_method(
             "GET",
             apigateway.LambdaIntegration(get_lambda, proxy=True),
-            api_key_required=False,
+            api_key_required=True,
         )
         resource.add_method(
             "DELETE",
             apigateway.LambdaIntegration(delete_lambda, proxy=True),
-            api_key_required=False,
+            api_key_required=True,
         )
         add_cors_options(resource, ["GET", "DELETE", "OPTIONS"])
 
@@ -129,7 +129,7 @@ class ApiConstruct(Construct):
         resource.add_method(
             "GET",
             apigateway.LambdaIntegration(lambda_fn, proxy=True),
-            api_key_required=False,
+            api_key_required=True,
         )
         add_cors_options(resource, ["GET", "OPTIONS"])
 
@@ -137,8 +137,8 @@ class ApiConstruct(Construct):
         """Setup /config endpoint."""
         resource = self.api.root.add_resource("config")
         integration = apigateway.LambdaIntegration(lambda_fn, proxy=True)
-        resource.add_method("GET", integration, api_key_required=False)
-        resource.add_method("PUT", integration, api_key_required=False)
+        resource.add_method("GET", integration, api_key_required=True)
+        resource.add_method("PUT", integration, api_key_required=True)
         add_cors_options(resource, ["GET", "PUT", "OPTIONS"])
 
     def _setup_tenant_limit_endpoint(self, lambda_fn: lambda_.Function) -> None:
@@ -147,7 +147,7 @@ class ApiConstruct(Construct):
         resource.add_method(
             "POST",
             apigateway.LambdaIntegration(lambda_fn, proxy=True),
-            api_key_required=False,
+            api_key_required=True,
         )
         add_cors_options(resource, ["POST", "OPTIONS"])
 
@@ -157,6 +157,6 @@ class ApiConstruct(Construct):
         resource.add_method(
             "GET",
             apigateway.LambdaIntegration(lambda_fn, proxy=True),
-            api_key_required=False,
+            api_key_required=True,
         )
         add_cors_options(resource, ["GET", "OPTIONS"])

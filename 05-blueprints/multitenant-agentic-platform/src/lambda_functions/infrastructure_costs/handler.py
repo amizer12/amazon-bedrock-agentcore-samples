@@ -23,8 +23,21 @@ def get_current_tenant_ids():
     Only returns tenants that have aggregation records.
     """
     try:
-        response = aggregation_table.scan()
-        items = response.get("Items", [])
+        # Scan with pagination
+        items = []
+        last_evaluated_key = None
+        
+        while True:
+            if last_evaluated_key:
+                response = aggregation_table.scan(ExclusiveStartKey=last_evaluated_key)
+            else:
+                response = aggregation_table.scan()
+            
+            items.extend(response.get("Items", []))
+            
+            last_evaluated_key = response.get("LastEvaluatedKey")
+            if not last_evaluated_key:
+                break
 
         # Extract unique tenant IDs from tenant: prefixed keys
         tenant_ids = set()

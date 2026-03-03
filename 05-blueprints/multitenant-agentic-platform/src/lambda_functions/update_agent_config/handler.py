@@ -74,17 +74,17 @@ def lambda_handler(event, context):
             expr_attr_names = {}
 
             # Always update the timestamp
-            update_expr_parts.append("#updatedAt = :updatedAt")
-            expr_attr_names["#updatedAt"] = "updatedAt"
-            expr_attr_values[":updatedAt"] = datetime.now().isoformat()
+            update_expr_parts.append("#attr0 = :val0")
+            expr_attr_names["#attr0"] = "updatedAt"
+            expr_attr_values[":val0"] = datetime.now().isoformat()
 
-            # Add config updates
-            for key, value in config_updates.items():
-                safe_key = f"#cfg_{key}"
-                value_key = f":cfg_{key}"
-                update_expr_parts.append(f"{safe_key} = {value_key}")
-                expr_attr_names[safe_key] = key
-                expr_attr_values[value_key] = value
+            # Add config updates using indexed placeholders
+            for idx, (key, value) in enumerate(config_updates.items(), start=1):
+                attr_placeholder = f"#attr{idx}"
+                value_placeholder = f":val{idx}"
+                update_expr_parts.append(f"{attr_placeholder} = {value_placeholder}")
+                expr_attr_names[attr_placeholder] = key
+                expr_attr_values[value_placeholder] = value
 
             update_expression = "SET " + ", ".join(update_expr_parts)
 

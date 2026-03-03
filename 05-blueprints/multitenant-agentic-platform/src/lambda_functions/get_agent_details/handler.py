@@ -1,6 +1,7 @@
 import json
 import os
 import boto3
+from boto3.dynamodb.conditions import Key
 import traceback
 
 dynamodb = boto3.resource("dynamodb")
@@ -33,10 +34,7 @@ def lambda_handler(event, context):
         # Query DynamoDB for all agents with this tenantId
         print(f"Looking for agents with tenantId: {tenant_id}")
 
-        response = table.query(
-            KeyConditionExpression="tenantId = :tid",
-            ExpressionAttributeValues={":tid": tenant_id},
-        )
+        response = table.query(KeyConditionExpression=Key("tenantId").eq(tenant_id))
 
         agents = response.get("Items", [])
 

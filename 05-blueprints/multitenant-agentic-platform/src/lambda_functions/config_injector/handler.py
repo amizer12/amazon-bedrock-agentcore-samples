@@ -12,6 +12,21 @@ def lambda_handler(event, context):
     """
     Custom Resource Lambda to inject runtime config into frontend config.js
     This runs AFTER the stack is deployed and API is created
+    
+    SECURITY WARNING: This implementation exposes the API Gateway API key in client-side
+    JavaScript, making it publicly accessible to anyone who views the page source.
+    This defeats the purpose of API key authentication.
+    
+    For production use, consider one of these alternatives:
+    1. Use Amazon Cognito for user authentication with JWT tokens
+    2. Use IAM authentication with AWS Signature Version 4
+    3. Remove API key requirement and use other controls (VPC, IP allowlisting)
+    4. Implement a backend-for-frontend (BFF) pattern with server-side API calls
+    
+    This current implementation is suitable ONLY for:
+    - Internal demos where the dashboard URL is not publicly accessible
+    - Development/testing environments
+    - Proof-of-concept deployments
     """
     print(f"Received event: {json.dumps(event)}")
 
@@ -29,6 +44,7 @@ def lambda_handler(event, context):
             distribution_id = os.environ.get("DISTRIBUTION_ID", "")
 
             # Retrieve the actual API key value
+            # WARNING: This key will be publicly visible in the browser
             apigateway = boto3.client("apigateway")
             api_key_response = apigateway.get_api_key(
                 apiKey=api_key_id, includeValue=True
@@ -40,6 +56,7 @@ def lambda_handler(event, context):
             api_endpoint_clean = api_endpoint.rstrip("/")
 
             config_content = f"""// This file is auto-generated during deployment
+// WARNING: API_KEY is exposed in client-side code - suitable for demos only
 window.APP_CONFIG = {{
   API_ENDPOINT: '{api_endpoint_clean}',
   API_KEY: '{api_key_value}',

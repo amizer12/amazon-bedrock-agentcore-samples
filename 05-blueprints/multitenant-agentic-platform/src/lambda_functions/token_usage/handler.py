@@ -8,9 +8,21 @@ aggregation_table = dynamodb.Table(os.environ["AGGREGATION_TABLE_NAME"])
 
 def lambda_handler(event, context):
     try:
-        # Scan the aggregation table
-        response = aggregation_table.scan()
-        items = response.get("Items", [])
+        # Scan the aggregation table with pagination
+        items = []
+        last_evaluated_key = None
+        
+        while True:
+            if last_evaluated_key:
+                response = aggregation_table.scan(ExclusiveStartKey=last_evaluated_key)
+            else:
+                response = aggregation_table.scan()
+            
+            items.extend(response.get("Items", []))
+            
+            last_evaluated_key = response.get("LastEvaluatedKey")
+            if not last_evaluated_key:
+                break
 
         # Filter for tenant records
         tenant_items = [

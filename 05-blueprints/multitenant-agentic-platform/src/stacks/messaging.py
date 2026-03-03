@@ -7,14 +7,21 @@ from aws_cdk import Duration, RemovalPolicy, aws_sqs as sqs, aws_iam as iam
 class MessagingConstruct(Construct):
     """Construct for SQS queues used in the application."""
 
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(
+        self,
+        scope: Construct,
+        construct_id: str,
+        account_id: str,
+        region: str,
+        **kwargs,
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Dead-letter queue for failed messages
         self.usage_dlq = sqs.Queue(
             self,
             "TokenUsageDLQ",
-            queue_name="token-usage-dlq",
+            queue_name=f"token-usage-dlq-{account_id}-{region}",
             retention_period=Duration.days(14),
             removal_policy=RemovalPolicy.DESTROY,
         )
@@ -23,7 +30,7 @@ class MessagingConstruct(Construct):
         self.usage_queue = sqs.Queue(
             self,
             "TokenUsageQueue",
-            queue_name="token-usage-queue",
+            queue_name=f"token-usage-queue-{account_id}-{region}",
             visibility_timeout=Duration.seconds(300),
             retention_period=Duration.days(1),
             removal_policy=RemovalPolicy.DESTROY,

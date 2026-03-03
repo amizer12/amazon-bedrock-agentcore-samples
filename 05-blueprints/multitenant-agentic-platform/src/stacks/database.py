@@ -7,14 +7,21 @@ from aws_cdk import RemovalPolicy, aws_dynamodb as dynamodb
 class DatabaseConstruct(Construct):
     """Construct for all DynamoDB tables used in the application."""
 
-    def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
+    def __init__(
+        self,
+        scope: Construct,
+        construct_id: str,
+        account_id: str,
+        region: str,
+        **kwargs,
+    ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
         # Token usage table with streams enabled
         self.usage_table = dynamodb.Table(
             self,
             "TokenUsageTable",
-            table_name="token-usage",
+            table_name=f"token-usage-{account_id}-{region}",
             partition_key=dynamodb.Attribute(
                 name="id", type=dynamodb.AttributeType.STRING
             ),
@@ -31,7 +38,7 @@ class DatabaseConstruct(Construct):
         self.aggregation_table = dynamodb.Table(
             self,
             "TokenAggregationTable",
-            table_name="token-aggregation",
+            table_name=f"token-aggregation-{account_id}-{region}",
             partition_key=dynamodb.Attribute(
                 name="aggregation_key", type=dynamodb.AttributeType.STRING
             ),
@@ -44,7 +51,7 @@ class DatabaseConstruct(Construct):
         self.agent_config_table = dynamodb.Table(
             self,
             "AgentConfigTable",
-            table_name="agent-configurations",
+            table_name=f"agent-configurations-{account_id}-{region}",
             partition_key=dynamodb.Attribute(
                 name="tenantId", type=dynamodb.AttributeType.STRING
             ),
@@ -60,7 +67,7 @@ class DatabaseConstruct(Construct):
         self.agent_details_table = dynamodb.Table(
             self,
             "AgentDetailsTable",
-            table_name="agent-details-v2",
+            table_name=f"agent-details-{account_id}-{region}",
             partition_key=dynamodb.Attribute(
                 name="tenantId", type=dynamodb.AttributeType.STRING
             ),

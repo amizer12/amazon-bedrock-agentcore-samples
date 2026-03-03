@@ -17,17 +17,36 @@ class AgentRuntimeConstruct(Construct):
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # IAM role for Bedrock Agent Runtime
+        # IAM role for Bedrock Agent Runtime with least-privilege permissions
         self.agent_role = iam.Role(
             self,
             "BedrockAgentRole",
             role_name=f"AmazonBedrockAgentCoreSDKRuntime-{region}",
             assumed_by=iam.ServicePrincipal("bedrock-agentcore.amazonaws.com"),
-            managed_policies=[
-                iam.ManagedPolicy.from_aws_managed_policy_name(
-                    "AmazonBedrockFullAccess"
-                ),
-            ],
+            inline_policies={
+                "BedrockAgentCorePolicy": iam.PolicyDocument(
+                    statements=[
+                        # Bedrock model invocation permissions
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                "bedrock:InvokeModel",
+                                "bedrock:InvokeModelWithResponseStream",
+                            ],
+                            resources=[f"arn:aws:bedrock:{region}::foundation-model/*"],
+                        ),
+                        # AgentCore runtime permissions
+                        iam.PolicyStatement(
+                            effect=iam.Effect.ALLOW,
+                            actions=[
+                                "bedrock-agentcore:InvokeAgent",
+                                "bedrock-agentcore:GetAgent",
+                            ],
+                            resources=["*"],  # AgentCore resources are tenant-isolated
+                        ),
+                    ]
+                )
+            },
         )
 
         # Grant agent role permission to send to SQS
