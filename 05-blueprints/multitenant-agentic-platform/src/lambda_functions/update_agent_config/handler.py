@@ -21,10 +21,9 @@ def lambda_handler(event, context):
     try:
         # Handle GET request - retrieve config
         if event.get("httpMethod") == "GET":
-            tenant_id = event.get("queryStringParameters", {}).get("tenantId")
-            agent_runtime_id = event.get("queryStringParameters", {}).get(
-                "agentRuntimeId"
-            )
+            query_params = event.get("queryStringParameters") or {}
+            tenant_id = query_params.get("tenantId")
+            agent_runtime_id = query_params.get("agentRuntimeId")
 
             if not tenant_id or not agent_runtime_id:
                 return {
@@ -54,7 +53,8 @@ def lambda_handler(event, context):
 
         # Handle PUT request - update config
         elif event.get("httpMethod") == "PUT":
-            body = json.loads(event.get("body", "{}"))
+            raw_body = event.get("body") or "{}"
+            body = json.loads(raw_body)
             tenant_id = body.get("tenantId")
             agent_runtime_id = body.get("agentRuntimeId")
             config_updates = body.get("config", {})

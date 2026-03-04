@@ -100,11 +100,11 @@ This script will:
 1. Install frontend dependencies
 2. Build the React application
 3. Deploy the entire CDK stack (infrastructure + frontend)
-4. **Automatically generate config.js** with API endpoint and key (⚠️ See Security Considerations below)
+4. **Automatically generate config.js** with the API endpoint and other non‑secret configuration (⚠️ See Security Considerations below)
 5. Deploy frontend to S3 and CloudFront
 6. Invalidate CloudFront cache
 
-> **⚠️ Security Note**: The deployment process embeds the API Gateway key in a publicly accessible `config.js` file. This is suitable for demos and development only. See the [Security Considerations](#security-considerations) section for production recommendations.
+> **⚠️ Security Note**: Do **not** embed API Gateway keys or other long‑lived credentials in publicly accessible files such as `config.js`. For production deployments, use authenticated callers (for example, Cognito/IAM/JWT) or a backend proxy/BFF that keeps credentials server‑side and issues short‑lived, scoped tokens to the frontend instead. See the [Security Considerations](#security-considerations) section for detailed production recommendations.
 
 ### Deploy to a Specific Region
 

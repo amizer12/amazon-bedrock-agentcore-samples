@@ -20,9 +20,8 @@ def lambda_handler(event, context):
 
     try:
         # Get tenantId from query parameters
-        tenant_id = None
-        if "queryStringParameters" in event and event["queryStringParameters"]:
-            tenant_id = event["queryStringParameters"].get("tenantId")
+        query_params = event.get("queryStringParameters") or {}
+        tenant_id = query_params.get("tenantId")
 
         if not tenant_id:
             return {

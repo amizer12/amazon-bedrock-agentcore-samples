@@ -8,20 +8,15 @@ lambda_client = boto3.client("lambda")
 def lambda_handler(event, context):
     try:
         # Get tenantId and config from query parameters or body
-        tenant_id = None
+        query_params = event.get("queryStringParameters") or {}
+        tenant_id = query_params.get("tenantId")
         config = {}
         template = {}
         tools = {}
 
-        if "queryStringParameters" in event and event["queryStringParameters"]:
-            tenant_id = event["queryStringParameters"].get("tenantId")
-
-        if "body" in event and event["body"]:
-            body = (
-                json.loads(event["body"])
-                if isinstance(event["body"], str)
-                else event["body"]
-            )
+        raw_body = event.get("body")
+        if raw_body:
+            body = json.loads(raw_body) if isinstance(raw_body, str) else raw_body
             if not tenant_id:
                 tenant_id = body.get("tenantId")
             config = body.get("config", {})

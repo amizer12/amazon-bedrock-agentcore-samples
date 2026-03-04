@@ -146,7 +146,8 @@ def lambda_handler(event, context):
     print(f"Received event: {json.dumps(event)}")
 
     try:
-        body = json.loads(event.get("body", "{}"))
+        raw_body = event.get("body") or "{}"
+        body = json.loads(raw_body)
         agent_id = body.get("agentId")
         input_text = body.get("inputText")
         session_id = body.get("sessionId", "default-session")

@@ -28,7 +28,7 @@ echo "   - Frontend (S3 + CloudFront)"
 echo "   - Auto-generating config.js with API credentials"
 echo ""
 
-# Set region to us-west-2 (or use AWS_DEFAULT_REGION if set)
+# Set region to us-east-1 (or use AWS_DEFAULT_REGION if set)
 export CDK_DEFAULT_REGION=${AWS_DEFAULT_REGION:-us-east-1}
 echo "   Deploying to region: $CDK_DEFAULT_REGION"
 echo ""
@@ -41,7 +41,7 @@ cdk deploy --require-approval never --app "python3 src/cdk_app.py"
 echo ""
 echo "✅ Deployment complete!"
 echo ""
-echo "� Stack Outputs:"
+echo "Stack Outputs:"
 echo "   Check the outputs above for:"
 echo "   - Frontend URL (CloudFront)"
 echo "   - API Endpoint"

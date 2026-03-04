@@ -53,13 +53,11 @@ def lambda_handler(event, context):
 
     try:
         # Parse request body
-        body = {}
-        if event.get("body"):
-            body = (
-                json.loads(event["body"])
-                if isinstance(event["body"], str)
-                else event["body"]
-            )
+        raw_body = event.get("body")
+        if raw_body:
+            body = json.loads(raw_body) if isinstance(raw_body, str) else raw_body
+        else:
+            body = {}
 
         tenant_id = body.get("tenantId")
         token_limit = body.get("tokenLimit")

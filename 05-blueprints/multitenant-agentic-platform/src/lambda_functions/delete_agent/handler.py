@@ -23,11 +23,9 @@ def lambda_handler(event, context):
 
     try:
         # Get tenantId and agentRuntimeId from query parameters
-        tenant_id = None
-        agent_runtime_id = None
-        if "queryStringParameters" in event and event["queryStringParameters"]:
-            tenant_id = event["queryStringParameters"].get("tenantId")
-            agent_runtime_id = event["queryStringParameters"].get("agentRuntimeId")
+        query_params = event.get("queryStringParameters") or {}
+        tenant_id = query_params.get("tenantId")
+        agent_runtime_id = query_params.get("agentRuntimeId")
 
         if not tenant_id or not agent_runtime_id:
             return {

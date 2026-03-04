@@ -204,7 +204,10 @@ function App() {
   const deleteAgent = async (tenantId, agentRuntimeId, agentName) => {
     if (!window.confirm(`Delete agent "${agentName}" for tenant: ${tenantId}?`)) return;
     try {
-      await axios.delete(`${API_ENDPOINT}/agent?tenantId=${tenantId}&agentRuntimeId=${agentRuntimeId}`);
+       await axios.delete(
+        `${API_ENDPOINT}/agent?tenantId=${tenantId}&agentRuntimeId=${agentRuntimeId}`,
+        { headers: { 'x-api-key': API_KEY } }
+      );
       alert(`Agent "${agentName}" deleted successfully`);
       fetchAgents();
       // Use functional update to avoid stale closure
@@ -350,7 +353,7 @@ function App() {
           await axios.post(
             `${API_ENDPOINT}/tenant-limit`,
             { tenantId, tokenLimit: parseInt(tokenLimit, 10) },
-            { headers: { 'Content-Type': 'application/json' } }
+            { headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY } }
           );
         } catch (limitError) {
           console.error('Error setting token limit:', limitError);
@@ -393,7 +396,9 @@ function App() {
         const pollInterval = setInterval(async () => {
           pollCount++;
           try {
-            const agentResponse = await axios.get(`${API_ENDPOINT}/agent?tenantId=${tenantId}`);
+            const agentResponse = await axios.get(`${API_ENDPOINT}/agent?tenantId=${tenantId}`, {
+              headers: { 'x-api-key': API_KEY }
+            });
             if (agentResponse.status === 200 && agentResponse.data) {
               clearInterval(pollInterval);
               setDeployedAgent(agentResponse.data);
@@ -441,7 +446,7 @@ function App() {
           sessionId: `session-${Date.now()}`,
           tenantId: selectedAgentForInvoke.tenantId  // Pass tenant ID for limit checking
         },
-        { headers: { 'Content-Type': 'application/json' }, timeout: 60000 }
+        { headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY }, timeout: 60000 }
       );
       const extractText = (obj) => {
         if (typeof obj === 'string') {

@@ -43,6 +43,8 @@ BUCKET_NAME = os.environ.get(
 )
 QUEUE_URL = os.environ.get("QUEUE_URL", "")
 ROLE_ARN = os.environ.get("ROLE_ARN", "")
+AGENT_CONFIG_TABLE_NAME = os.environ.get("AGENT_CONFIG_TABLE_NAME", "agent-configurations")
+AGENT_DETAILS_TABLE_NAME = os.environ.get("AGENT_DETAILS_TABLE_NAME", "agent-details-v2")
 
 s3_client = boto3.client("s3", region_name=REGION)
 bedrock_client = boto3.client("bedrock-agentcore-control", region_name=REGION)
@@ -340,11 +342,12 @@ TENANT_ID = 'TENANT_ID_VALUE'
 AGENT_RUNTIME_ID = 'AGENT_RUNTIME_ID_VALUE'
 MODEL_ID = 'MODEL_ID_VALUE'
 SYSTEM_PROMPT = '''SYSTEM_PROMPT_VALUE'''
+AGENT_CONFIG_TABLE_NAME = 'AGENT_CONFIG_TABLE_NAME_VALUE'
 
 # Initialize clients
 sqs = boto3.client('sqs', region_name=region)
 dynamodb = boto3.resource('dynamodb', region_name=region)
-config_table = dynamodb.Table('agent-configurations')
+config_table = dynamodb.Table(AGENT_CONFIG_TABLE_NAME)
 
 # Initialize agent with deployment-time config
 agent = Agent(
@@ -507,6 +510,7 @@ def build_agent_project(
     main_content = main_content.replace(
         "SYSTEM_PROMPT_VALUE", system_prompt.replace("'", "\\'")
     )
+    main_content = main_content.replace("AGENT_CONFIG_TABLE_NAME_VALUE", AGENT_CONFIG_TABLE_NAME)
 
     main_path = os.path.join(project_dir, "main.py")
     with open(main_path, "w") as f:
@@ -817,8 +821,8 @@ def lambda_handler(event, context):
         # Store agent details in DynamoDB for later retrieval
         try:
             dynamodb = boto3.resource("dynamodb")
-            agent_table = dynamodb.Table("agent-details-v2")
-            config_table = dynamodb.Table("agent-configurations")
+            agent_table = dynamodb.Table(AGENT_DETAILS_TABLE_NAME)
+            config_table = dynamodb.Table(AGENT_CONFIG_TABLE_NAME)
 
             # Convert config to DynamoDB-compatible format (Float -> Decimal)
             from decimal import Decimal
