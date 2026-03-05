@@ -11,8 +11,6 @@ def lambda_handler(event, context):
     try:
         # Scan the aggregation table with pagination and server-side filtering
         # Use FilterExpression to filter at DynamoDB level, not in memory
-        from boto3.dynamodb.conditions import Attr
-        
         tenant_items = []
         last_evaluated_key = None
         
