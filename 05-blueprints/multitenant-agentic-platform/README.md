@@ -181,29 +181,6 @@ After deployment, you'll see outputs including:
 
 **⚠️ IMPORTANT: This blueprint is designed for demonstration and development purposes.**
 
-The current implementation has the following security limitations:
-
-1. **API Key Exposure**: The API Gateway API key is embedded in client-side JavaScript (`config.js`), making it publicly accessible to anyone who views the page source or network traffic. This means:
-   - Anyone with access to the dashboard URL can extract the API key
-   - The API key can be used to make unlimited API calls
-   - This defeats the purpose of API key authentication
-
-2. **Suitable Use Cases**:
-   - Internal demos where the dashboard URL is not publicly accessible
-   - Development and testing environments
-   - Proof-of-concept deployments within a trusted network
-
-3. **Production Recommendations**:
-   
-   For production deployments, implement one of these authentication mechanisms:
-   
-   - **Amazon Cognito**: Use Cognito User Pools for user authentication with JWT tokens
-   - **IAM Authentication**: Use AWS Signature Version 4 for API requests
-   - **Backend-for-Frontend (BFF)**: Implement a server-side proxy that handles API authentication
-   - **Remove API Keys**: Use VPC endpoints, IP allowlisting, or other network-level controls instead
-
-   See `src/lambda_functions/config_injector/handler.py` for detailed implementation notes.
-
 ### Getting Started
 
 1. Visit the CloudFront URL from the stack outputs
