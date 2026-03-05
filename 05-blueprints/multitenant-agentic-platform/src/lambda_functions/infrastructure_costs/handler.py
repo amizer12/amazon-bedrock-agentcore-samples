@@ -12,9 +12,15 @@ import boto3
 
 dynamodb = boto3.resource("dynamodb")
 ce_client = boto3.client("ce")
-aggregation_table = dynamodb.Table(
-    os.environ.get("AGGREGATION_TABLE_NAME", "token-aggregation")
-)
+
+# Require AGGREGATION_TABLE_NAME to be set - fail fast if misconfigured
+if "AGGREGATION_TABLE_NAME" not in os.environ:
+    raise ValueError(
+        "AGGREGATION_TABLE_NAME environment variable is required but not set. "
+        "This Lambda function cannot operate without proper configuration."
+    )
+
+aggregation_table = dynamodb.Table(os.environ["AGGREGATION_TABLE_NAME"])
 
 
 def get_current_tenant_ids():
@@ -23,30 +29,33 @@ def get_current_tenant_ids():
     Only returns tenants that have aggregation records.
     """
     try:
-        # Scan with pagination
-        items = []
+        # Scan with pagination and server-side filtering
+        from boto3.dynamodb.conditions import Attr
+        
+        tenant_ids = set()
         last_evaluated_key = None
         
         while True:
-            if last_evaluated_key:
-                response = aggregation_table.scan(ExclusiveStartKey=last_evaluated_key)
-            else:
-                response = aggregation_table.scan()
+            scan_kwargs = {
+                "FilterExpression": Attr("aggregation_key").begins_with("tenant:"),
+                # Only retrieve the fields we need
+                "ProjectionExpression": "tenant_id"
+            }
             
-            items.extend(response.get("Items", []))
+            if last_evaluated_key:
+                scan_kwargs["ExclusiveStartKey"] = last_evaluated_key
+            
+            response = aggregation_table.scan(**scan_kwargs)
+            
+            # Extract tenant IDs from the filtered results
+            for item in response.get("Items", []):
+                tenant_id = item.get("tenant_id")
+                if tenant_id:
+                    tenant_ids.add(tenant_id)
             
             last_evaluated_key = response.get("LastEvaluatedKey")
             if not last_evaluated_key:
                 break
-
-        # Extract unique tenant IDs from tenant: prefixed keys
-        tenant_ids = set()
-        for item in items:
-            agg_key = item.get("aggregation_key", "")
-            if agg_key.startswith("tenant:"):
-                tenant_id = item.get("tenant_id")
-                if tenant_id:
-                    tenant_ids.add(tenant_id)
 
         return list(tenant_ids)
     except Exception as e:

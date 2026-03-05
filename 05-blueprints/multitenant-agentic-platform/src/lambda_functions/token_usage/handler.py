@@ -1,6 +1,7 @@
 import json
 import os
 import boto3
+from boto3.dynamodb.conditions import Attr
 
 dynamodb = boto3.resource("dynamodb")
 aggregation_table = dynamodb.Table(os.environ["AGGREGATION_TABLE_NAME"])
@@ -8,28 +9,30 @@ aggregation_table = dynamodb.Table(os.environ["AGGREGATION_TABLE_NAME"])
 
 def lambda_handler(event, context):
     try:
-        # Scan the aggregation table with pagination
-        items = []
+        # Scan the aggregation table with pagination and server-side filtering
+        # Use FilterExpression to filter at DynamoDB level, not in memory
+        from boto3.dynamodb.conditions import Attr
+        
+        tenant_items = []
         last_evaluated_key = None
         
         while True:
-            if last_evaluated_key:
-                response = aggregation_table.scan(ExclusiveStartKey=last_evaluated_key)
-            else:
-                response = aggregation_table.scan()
+            scan_kwargs = {
+                "FilterExpression": Attr("aggregation_key").begins_with("tenant:"),
+                # Only retrieve fields needed by the frontend
+                "ProjectionExpression": "aggregation_key, tenant_id, total_tokens, token_limit, #ts",
+                "ExpressionAttributeNames": {"#ts": "timestamp"}  # 'timestamp' is a reserved word
+            }
             
-            items.extend(response.get("Items", []))
+            if last_evaluated_key:
+                scan_kwargs["ExclusiveStartKey"] = last_evaluated_key
+            
+            response = aggregation_table.scan(**scan_kwargs)
+            tenant_items.extend(response.get("Items", []))
             
             last_evaluated_key = response.get("LastEvaluatedKey")
             if not last_evaluated_key:
                 break
-
-        # Filter for tenant records
-        tenant_items = [
-            item
-            for item in items
-            if item.get("aggregation_key", "").startswith("tenant:")
-        ]
 
         return {
             "statusCode": 200,

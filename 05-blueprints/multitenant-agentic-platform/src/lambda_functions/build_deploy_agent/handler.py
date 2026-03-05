@@ -35,16 +35,20 @@ import requests  # noqa: E402
 import time  # noqa: E402
 from datetime import datetime  # noqa: E402
 
-# Get configuration from environment variables or use defaults
+# Get configuration from environment variables (all required)
 REGION = region = os.environ["AWS_REGION"]
-AGENT_NAME = os.environ.get("AGENT_NAME", "sqs")
-BUCKET_NAME = os.environ.get(
-    "BUCKET_NAME", f"bedrock-agentcore-code-803141810841-{REGION}"
-)
-QUEUE_URL = os.environ.get("QUEUE_URL", "")
-ROLE_ARN = os.environ.get("ROLE_ARN", "")
-AGENT_CONFIG_TABLE_NAME = os.environ.get("AGENT_CONFIG_TABLE_NAME", "agent-configurations")
-AGENT_DETAILS_TABLE_NAME = os.environ.get("AGENT_DETAILS_TABLE_NAME", "agent-details-v2")
+AGENT_NAME = os.environ["AGENT_NAME"]
+BUCKET_NAME = os.environ["BUCKET_NAME"]
+QUEUE_URL = os.environ["QUEUE_URL"]
+ROLE_ARN = os.environ["ROLE_ARN"]
+AGENT_CONFIG_TABLE_NAME = os.environ["AGENT_CONFIG_TABLE_NAME"]
+AGENT_DETAILS_TABLE_NAME = os.environ["AGENT_DETAILS_TABLE_NAME"]
+
+if not AGENT_CONFIG_TABLE_NAME or not AGENT_DETAILS_TABLE_NAME:
+    raise ValueError(
+        "AGENT_CONFIG_TABLE_NAME and AGENT_DETAILS_TABLE_NAME environment variables are required. "
+        "This Lambda must be configured with the correct DynamoDB table names."
+    )
 
 s3_client = boto3.client("s3", region_name=REGION)
 bedrock_client = boto3.client("bedrock-agentcore-control", region_name=REGION)

@@ -76,25 +76,30 @@ class FrontendConstruct(Construct):
             ],
         )
 
-        # Deploy frontend files (if they exist)
-        frontend_deployment = None
-        try:
-            frontend_deployment = s3_deployment.BucketDeployment(
-                self,
-                "DeployFrontend",
-                sources=[
-                    s3_deployment.Source.asset(
-                        os.path.join(project_root, "frontend/dist")
-                    )
-                ],
-                destination_bucket=self.bucket,
-                distribution=self.distribution,
-                distribution_paths=["/*"],
+        # Deploy frontend files
+        frontend_dist_path = os.path.join(project_root, "frontend/dist")
+        
+        # Check if frontend build exists
+        if not os.path.exists(frontend_dist_path):
+            print("=" * 80)
+            print("WARNING: Frontend build not found!")
+            print(f"Expected location: {frontend_dist_path}")
+            print("To build the frontend, run:")
+            print("  cd frontend && npm install && npm run build")
+            print("=" * 80)
+            raise FileNotFoundError(
+                f"Frontend build directory not found at {frontend_dist_path}. "
+                "Please build the frontend before deploying."
             )
-        except Exception:
-            print(
-                "Frontend build not found. Run 'cd frontend && npm install && npm run build' to build the frontend."
-            )
+        
+        frontend_deployment = s3_deployment.BucketDeployment(
+            self,
+            "DeployFrontend",
+            sources=[s3_deployment.Source.asset(frontend_dist_path)],
+            destination_bucket=self.bucket,
+            distribution=self.distribution,
+            distribution_paths=["/*"],
+        )
 
         # Config injector Lambda
         config_injector_log_group = logs.LogGroup(
@@ -151,5 +156,4 @@ class FrontendConstruct(Construct):
         )
         config_injection.node.add_dependency(api)
         config_injection.node.add_dependency(api_key)
-        if frontend_deployment:
-            config_injection.node.add_dependency(frontend_deployment)
+        config_injection.node.add_dependency(frontend_deployment)
