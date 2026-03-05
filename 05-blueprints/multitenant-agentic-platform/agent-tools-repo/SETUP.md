@@ -28,7 +28,7 @@ git push -u origin main
 Visit your repository on GitHub and verify all files are present:
 - ✅ catalog.json
 - ✅ README.md
-- ✅ templates/base-agent.py
+- ✅ templates/main.py
 - ✅ tools/web-search/
 - ✅ tools/calculator/
 - ✅ tools/database-query/

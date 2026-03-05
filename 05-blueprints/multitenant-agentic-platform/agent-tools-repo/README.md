@@ -8,7 +8,7 @@ This repository contains modular tools for composing AI agents with various capa
 agent-tools-repo/
 ├── catalog.json              # Tool catalog
 ├── templates/
-│   └── base-agent.py        # Base agent template
+│   └── main.py        # Base agent template
 └── tools/
     ├── web-search/          # Web search tool
     ├── calculator/          # Calculator tool
